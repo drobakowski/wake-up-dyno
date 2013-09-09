@@ -30,7 +30,7 @@ wake_up_dyno(UnkownDynoType) ->
     DynoProplist :: [term()],
     Reason       :: term().
 config_data() ->
-    ConfigFile = element(2, file:get_cwd()) ++ "/" ++ ?WAKE_UP_DYNO_CONFIG,
+    ConfigFile = element(2, file:get_cwd()) ++ "/bin/" ++ ?WAKE_UP_DYNO_CONFIG,
     file:consult(ConfigFile).
 
 main(_) ->
