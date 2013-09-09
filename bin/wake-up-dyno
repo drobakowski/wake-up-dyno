@@ -1,0 +1,43 @@
+#!/usr/bin/env escript
+%% -*- erlang -*-
+%%! -smp enable -s inets
+
+-mode (compile).
+
+-export ([wake_up_dyno/1]).
+
+-define (WAKE_UP_DYNO_CONFIG, "wake-up-dyno.config").
+-define (HEROKUAPPS_DOMAIN, "herokuapp.com").
+
+-type dyno() :: atom()
+              | nonempty_string().
+
+-spec wake_up_dyno(Dyno) -> ok
+                          | {error, wrong_dyno_type} when
+    Dyno :: dyno().
+wake_up_dyno(Dyno) when is_atom(Dyno) ->
+    wake_up_dyno(atom_to_list(Dyno));
+wake_up_dyno(Dyno) when is_list(Dyno) ->
+    io:format("wake_up_dyno: trying to wake dyno: ~p...~n", [Dyno]),
+    httpc:request("http://" ++ Dyno ++ "." ++ ?HEROKUAPPS_DOMAIN),
+    io:format("wake_up_dyno: done waking dyno: ~p~n", [Dyno]);
+wake_up_dyno(UnkownDynoType) ->
+    io:format("wake_up_dyno: wrong type for dyno: ~p...~n", [UnkownDynoType]),
+    {error, wrong_dyno_type}.
+
+-spec config_data() -> {ok, DynoProplist}
+                     | {error, Reason} when
+    DynoProplist :: [term()],
+    Reason       :: term().
+config_data() ->
+    ConfigFile = element(2, file:get_cwd()) ++ "/bin/" ++ ?WAKE_UP_DYNO_CONFIG,
+    file:consult(ConfigFile).
+
+main(_) ->
+    case config_data() of
+        {ok, DynoProplist} ->
+            lists:foreach(fun wake_up_dyno/1, proplists:get_value(dynos_to_wake, DynoProplist, [])),
+            io:format("done...~n", []);
+        {error, _} ->
+            io:format("Config file is not properly defined...~n", [])
+    end.
