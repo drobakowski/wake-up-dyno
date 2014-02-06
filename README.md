@@ -30,3 +30,7 @@ Prevent single Dynos on Heroku to idle
 ```heroku run bash```
    * Execute:
 ```./bin/wake-up-dyno``` and check the console output for errors
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/drobakowski/wake-up-dyno/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
